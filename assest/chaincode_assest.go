@@ -3,11 +3,22 @@ package main
 import (
 	"errors"
 	"fmt"
-
+	//"strconv"
+	"encoding/json"
+	//"time"
+	//"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 type SimpleChaincode struct {
+}
+
+var assestIndexstr = "_assestindex"
+
+var Assest struct {
+	Serialno string `json:"serialno"`
+	Partno string `json:"partno"`
+	Owner string `json:"owner"`
 }
 
 func main() {
@@ -22,19 +33,11 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 
 	var err error
 
-	if len(args)%2 != 0 {
-		return nil, errors.New("Incorrect number of arguments. Must have pair of string and number")
-	}
-
-	// Initialize the chaincode
-
-	for i := 0; i < len(args); i = i + 2 {
-
-		err = stub.PutState(args[i], []byte(args[i+1]))
-		if err != nil {
-			return nil, err
-		}
-
+	var empty []string
+	jsonAsBytes, _ := json.Marshal(empty)									
+	err = stub.PutState(assestIndexstr, jsonAsBytes)
+	if err != nil {
+		return nil, err
 	}
 
 	return nil, nil
@@ -46,8 +49,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	// Handle different functions
     if function == "init" {
         return t.Init(stub, "init", args)
-    } else if function == "write" {
-        return t.write(stub, args)	
+    } else if function == "init_assset" {
+        return t.init_assset(stub, args)	
     }
     fmt.Println("invoke did not find func: " + function)				//error
 
@@ -55,33 +58,45 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 }
 
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-    fmt.Println("query is running " + function)
+	fmt.Println("query is running " + function)
 
-    // Handle different functions
-    if function == "read" {                            //read a variable
-        return t.read(stub, args)
-    }
-    fmt.Println("query did not find func: " + function)
+	// Handle different functions
+	if function == "read" {													//read a variable
+		return t.read(stub, args)
+	}
+	fmt.Println("query did not find func: " + function)						//error
 
-    return nil, errors.New("Received unknown function query")
+	return nil, errors.New("Received unknown function query")
 }
 
-func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-
-    var err error
-
-	if len(args)%2 != 0 {
-		return nil, errors.New("Incorrect number of arguments. Must have pair of string and number")
+func (t *SimpleChaincode) init_assset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var err error
+	// S001 LHTMO bosch
+	if len(args) != 3{
+		return nil, errors.New("Incorrect number of arguments. Expecting 4")
 	}
-	fmt.Println("running write()")
 
-	for i := 0; i < len(args); i = i + 2 {
+	serialno := args[0]
+	partno := args[1]
+	owner := args[2]
 
-		err = stub.PutState(args[i], []byte(args[i+1]))
-		if err != nil {
-			return nil, err
-		}
+	//check assest already exist
+	/*assestAsBytes, err := stub.GetState(serialno)
+	if err != nil {
+		return nil, errors.New("Failed to get assest")
+	}
+	res := Assest{}
+	json.Unmarshal (assestAsBytes, &res)
+	if res.Serialno == serialno {
+		fmt.Println("This assest arleady exists: " + serialno)
+		fmt.Println(res);
+		return nil, errors.New("This assest arleady exists")
+	}*/
 
+	str := `{"serialno": "` + serialno + `", "partno": "`+ partno + `", "owner": "` + owner + `"}`
+	err = stub.PutState(serialno, []byte(str))
+	if err != nil {
+		return nil, err
 	}
 
 	return nil, nil
