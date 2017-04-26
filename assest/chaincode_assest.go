@@ -50,7 +50,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
         return t.init_assset(stub, args)	
     } else if function == "write_owner" {
     	return t.write_owner(stub, args)
-    } 
+    } else {
+    	return nil, errors.New("Received unknown function Received: " + function)
+    }
     fmt.Println("invoke did not find func: " + function)				//error
 
 	return nil, errors.New("Received unknown function invocation: " + function)
