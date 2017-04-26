@@ -3,10 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	//"strconv"
 	"encoding/json"
-	//"time"
-	//"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -15,7 +12,7 @@ type SimpleChaincode struct {
 
 var assestIndexstr = "_assestindex"
 
-var Assest struct {
+type Assest struct {
 	Serialno string `json:"serialno"`
 	Partno string `json:"partno"`
 	Owner string `json:"owner"`
@@ -51,7 +48,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
         return t.Init(stub, "init", args)
     } else if function == "init_assset" {
         return t.init_assset(stub, args)	
-    }
+    } else if function == "write_owner" {
+    	return t.write_owner(stub, args)
+    } 
     fmt.Println("invoke did not find func: " + function)				//error
 
 	return nil, errors.New("Received unknown function invocation: " + function)
@@ -95,6 +94,7 @@ func (t *SimpleChaincode) init_assset(stub shim.ChaincodeStubInterface, args []s
 
 	str := `{"serialno": "` + serialno + `", "partno": "`+ partno + `", "owner": "` + owner + `"}`
 	err = stub.PutState(serialno, []byte(str))
+
 	if err != nil {
 		return nil, err
 	}
@@ -120,3 +120,32 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 
     return valAsbytes, nil
 }
+
+
+func (t *SimpleChaincode) write_owner(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var err error
+	// S001 LHTMO bosch
+	if len(args) != 3 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 4")
+	}
+
+	serialno := args[0]
+	partno := args[1]
+	owner := args[2]
+
+	str := `{"serialno": "` + serialno + `", "partno": "`+ partno + `", "owner": "` + owner + `"}`
+	err = stub.PutState(serialno, []byte(str))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+
+
+
+
+
+
