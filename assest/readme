@@ -1,0 +1,21 @@
+{
+  "jsonrpc": "2.0",
+  "method": "deploy",
+  "params": {
+    "type": 1,
+    "chaincodeID": {
+      "path": "https://github.com/Cibilan/learn-chaincode/finished"
+    },
+    "ctorMsg": {
+      "function": "init",
+      "args": [
+        "99"
+      ]
+    },
+    "secureContext": ""
+  },
+  "id": 1
+}
+
+
+
