@@ -111,12 +111,13 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
     }
 
     name = args[0]
-    valAsbytes, err := stub.GetCallerMetadata()
+    role, err := stub.GetCallerMetadata()
     if err != nil {
         jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
         return nil, errors.New(jsonResp)
     }
-    return valAsbytes, nil
+    fmt.Println("user metadata is", role)
+    return role, nil
 }
 
 
